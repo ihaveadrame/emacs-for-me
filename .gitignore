@@ -1,0 +1,9 @@
+*.pyc
+venv/
+GPATH
+GRTAGS
+GTAGS
+.idea/
+# 忽略emacs自动保存文件
+*~
+\#*\#

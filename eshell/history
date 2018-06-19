@@ -1,0 +1,20 @@
+ls
+ls
+001.c
+gcc 001.c 
+gcc 001.c 
+gcc 001.c 
+gcc 001.c 
+ls
+./a.out 001.c
+ls
+ls
+ls
+git status
+ls
+git status
+cd ~/fork_work/IAChina-CRM/
+ls
+vim tox.ini 
+ls
+cat lib/python2.7/

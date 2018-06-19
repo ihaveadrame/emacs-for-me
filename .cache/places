@@ -1,0 +1,17 @@
+;;; -*- coding: utf-8 -*-
+(("/Users/alan/.emacs.d/.cache/recentf" . 2233)
+ ("/Users/alan/.emacs.d/.cache/layouts/persp-auto-save" . 1411)
+ ("/Users/alan/fork_work/yunwei/bye/polls/admin.py" . 806)
+ ("/Users/alan/.emacs.d/init.el" . 769)
+ ("/Users/alan/fork_work/yunwei/bye/polls/"
+  (dired-filename . "/Users/alan/fork_work/yunwei/bye/polls/admin.py"))
+ ("/Users/alan/.spacemacs" . 2708)
+ ("/Users/alan/fork_work/a.txt" . 86)
+ ("/Users/alan/fork_work/yunwei/bye/polls/models.py" . 1213)
+ ("/Users/alan/#b.txt#" . 99)
+ ("/Users/alan/"
+  (dired-filename . "/Users/alan/gitlab"))
+ ("/Users/alan/.emacs.d/"
+  (dired-filename . "/Users/alan/.emacs.d/.cache"))
+ ("/Users/alan/.emacs.d/elpa/"
+  (dired-filename . "/Users/alan/.emacs.d/elpa/anzu-20161017.907")))
