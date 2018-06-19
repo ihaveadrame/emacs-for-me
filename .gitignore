@@ -7,3 +7,10 @@ GTAGS
 # 忽略emacs自动保存文件
 *~
 \#*\#
+.cache/
+anaconda-mode/
+.python-environments/
+*.eld
+network-security.data
+
+
