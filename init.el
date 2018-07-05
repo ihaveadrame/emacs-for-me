@@ -39,6 +39,97 @@
 ;; org-mode
 (add-hook 'org-mode-hook (lambda () (setq truncate-lines nil)))
 (setq org-export-backends (quote (ascii html icalendar latex md)))
+;; 设置org-model 插入源代码
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (python . t)
+   (C . t)
+   ))
+
+;; 设置org-capture 最小配置
+(require 'org)
+(global-set-key (kbd "C-c c") 'org-capture)
+(setq org-default-notes-file "~/org/inbox.org")
+(setq org-capture-templates nil)
+
+(add-to-list 'org-capture-templates '("t" "Tasks"))
+(add-to-list 'org-capture-templates
+             '("tr" "Book Reading Task" entry
+               (file+olp "~/Dropbox/org/task.org" "Reading" "Book")
+               "* TODO %^{书名}\n%u\n%a\n" :clock-in t :clock-resume t))
+(add-to-list 'org-capture-templates
+             '("tw" "Work Task" entry
+               (file+headline "~/Dropbox/org/task.org" "Work")
+               "* TODO %^{任务名}\n%u\n%a\n" :clock-in t :clock-resume t))
+
+(add-to-list 'org-capture-templates
+             '("j" "Journal" entry (file+weektree "~/Dropbox/org/journal.org")
+               "* %U - %^{heading}\n  %?"))
+
+(add-to-list 'org-capture-templates
+             '("i" "Inbox" entry (file "~/Dropbox/org/inbox.org")
+               "* %U - %^{heading} %^g\n %?\n"))
+
+(add-to-list 'org-capture-templates
+             '("n" "Notes" entry (file "~/Dropbox/org/notes/inbox.org")
+               "* %^{heading} %t %^g\n  %?\n"))
+
+(add-to-list 'org-capture-templates
+	     '("b" "Billing" plain
+	       (file+function "~/Dropbox/org/billing.org" find-month-tree)
+	       " | %U | %^{类别} | %^{描述} | %^{金额} | " :kill-buffer t))
+
+(defun get-year-and-month ()
+  (list (format-time-string "%Y年") (format-time-string "%m月")))
+
+
+(defun find-month-tree ()
+  (let* ((path (get-year-and-month))
+         (level 1)
+         end)
+    (unless (derived-mode-p 'org-mode)
+      (error "Target buffer \"%s\" should be in Org mode" (current-buffer)))
+    (goto-char (point-min))             ;移动到 buffer 的开始位置
+    ;; 先定位表示年份的 headline，再定位表示月份的 headline
+    (dolist (heading path)
+      (let ((re (format org-complex-heading-regexp-format
+                        (regexp-quote heading)))
+            (cnt 0))
+        (if (re-search-forward re end t)
+            (goto-char (point-at-bol))  ;如果找到了 headline 就移动到对应的位置
+          (progn                        ;否则就新建一个 headline
+            (or (bolp) (insert "\n"))
+            (if (/= (point) (point-min)) (org-end-of-subtree t t))
+            (insert (make-string level ?*) " " heading "\n"))))
+      (setq level (1+ level))
+      (setq end (save-excursion (org-end-of-subtree t t))))
+    (org-end-of-subtree)))
+
+
+(require 'epa-file)
+(custom-set-variables '(epg-gpg-program  "/usr/local/bin/gpg2"))
+(epa-file-enable)
+(setq epa-file-select-keys 0)
+(setq epa-file-cache-passphrase-for-symmetric-encryption t)
+
+
+(add-to-list 'org-capture-templates
+             '("p" "Passwords" entry (file "~/Dropbox/org/passwords.org.gpg")
+               "* %U - %^{title} %^G\n\n  - 用户名: %^{用户名}\n  - 密码: %^{密码}"
+               :empty-lines 1 :kill-buffer t))
+
+
+
+
+
+
+
+;; 设置中文字体
+(setq face-font-rescale-alist '(("宋体" . 1.2)
+                                    ("微软雅黑" . 1.2)
+                                    ("Microsoft Yahei" . 1.2)
+                                    ("WenQuanYi Zen Hei" . 1.2)))
 
 ;; Python 设置
 (defun my-python-mode-config ()
@@ -235,6 +326,9 @@
   "Function to search for executables.
 
 The value of this option is a function which is given the name or
+
+
+
 path of an executable and shall return the full path to the
 executable, or nil if the executable does not exit.
 
