@@ -108,7 +108,16 @@
 
 
 (require 'epa-file)
-(custom-set-variables '(epg-gpg-program  "/usr/local/bin/gpg2"))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(epg-gpg-program "/usr/local/bin/gpg2")
+ '(google-translate-default-source-language "en")
+ '(package-selected-packages
+   (quote
+    (htmlize anaconda-mode ggtags elpy company-jedi jedi-core ## neotree window-numbering smex hungry-delete company))))
 (epa-file-enable)
 (setq epa-file-select-keys 0)
 (setq epa-file-cache-passphrase-for-symmetric-encryption t)
@@ -120,8 +129,30 @@
                :empty-lines 1 :kill-buffer t))
 
 
-
-
+(require 'ox-publish)
+(setq org-publish-project-alist
+      '(
+    ("org-linusp"
+     ;; Path to your org files.
+     :base-directory "~/Dropbox/org/notes/"
+     :base-extension "org"
+     ;; Path to your Jekyll project.
+     :publishing-directory "~/Dropbox/"
+     :recursive t
+     :publishing-function org-html-publish-to-html
+     :headline-levels 4
+     :html-extension "html"
+     :body-only t ;; Only export section between <body> </body>
+     )
+    ("org-static-linusp"
+     :base-directory "~/blog/org/"
+     :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|php"
+     :publishing-directory "~/blog/Jekyll/"
+     :recursive t
+     :publishing-function org-publish-attachment
+     )
+    ("blog-linusp" :components ("org-linusp" "org-static-linusp"))
+    ))
 
 
 
@@ -386,15 +417,7 @@ Return nil if COMMAND is not found anywhere in `exec-path'."
 
 
 ;; 以下是安装包后配置
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(google-translate-default-source-language "en")
- '(package-selected-packages
-   (quote
-    (anaconda-mode ggtags elpy company-jedi jedi-core ## neotree window-numbering smex hungry-delete company))))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
