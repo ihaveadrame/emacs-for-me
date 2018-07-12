@@ -49,7 +49,9 @@
 
 ;; 设置org-capture 最小配置
 (require 'org)
+(setq org-export-default-language "zh-CN")
 (global-set-key (kbd "C-c c") 'org-capture)
+(setq org-export-with-sub-superscripts (quote {}))
 (setq org-default-notes-file "~/org/inbox.org")
 (setq org-capture-templates nil)
 
@@ -137,7 +139,7 @@
      :base-directory "~/Dropbox/org/notes/"
      :base-extension "org"
      ;; Path to your Jekyll project.
-     :publishing-directory "~/Dropbox/"
+     :publishing-directory "~/Dropbox/org/jekyll_blog/ihaveadrame.github.io/_posts/"
      :recursive t
      :publishing-function org-html-publish-to-html
      :headline-levels 4
