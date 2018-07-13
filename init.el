@@ -164,72 +164,6 @@
                                     ("Microsoft Yahei" . 1.2)
                                     ("WenQuanYi Zen Hei" . 1.2)))
 
-;; Python 设置
-(defun my-python-mode-config ()
-  (setq python-indent-offset 4
-        python-indent 4
-        indent-tabs-mode nil
-        default-tab-width 4
-
-        ;; 设置 run-python 的参数
-        python-shell-interpreter "ipython"
-        python-shell-interpreter-args "-i"
-        python-shell-prompt-regexp "In \\[[0-9]+\\]: "
-        python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
-        python-shell-completion-setup-code "from IPython.core.completerlib import module_completion"
-        python-shell-completion-module-string-code "';'.join(module_completion('''%s'''))\n"
-        python-shell-completion-string-code "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
-
-  (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
-;; 树形目录 
-  (add-to-list 'package-archives
-			   '("melpa" . "http://melpa.org/packages/"))
-  
-  (hs-minor-mode t)                     ;开启 hs-minor-mode 以支持代码折叠
-  (auto-fill-mode 0)                    ;关闭 auto-fill-mode，拒绝自动折行
-  (whitespace-mode 0)                   ;开启 whitespace-mode 对制表符和行为空格高亮 关闭吧 有问题再开
-  (hl-line-mode t)                      ;开启 hl-line-mode 对当前行进行高亮
-  (pretty-symbols-mode t)               ;开启 pretty-symbols-mode 将 lambda 显示成希腊字符 λ
-  (set (make-local-variable 'electric-indent-mode) nil)) ;关闭自动缩进
-
-(add-hook 'python-mode-hook 'my-python-mode-config)
-
-;; global
-
-
-;; Add Packages
- (defvar my/packages '(
-		;; --- Auto-completion ---
-		company
-		;; --- Better Editor ---
-		hungry-delete
-		swiper
-		counsel
-		smartparens
-		;; --- Major Mode ---
-		js2-mode
-		;; --- Minor Mode ---
-		nodejs-repl
-		exec-path-from-shell
-		;; --- Themes ---
-		monokai-theme
-		;; solarized-theme
-		) "Default packages")
-
- (setq package-selected-packages my/packages)
-
- (defun my/packages-installed-p ()
-     (loop for pkg in my/packages
-	   when (not (package-installed-p pkg)) do (return nil)
-	   finally (return t)))
-
- (unless (my/packages-installed-p)
-     (message "%s" "Refreshing package database...")
-     (package-refresh-contents)
-     (dolist (pkg my/packages)
-       (when (not (package-installed-p pkg))
-	 (package-install pkg))))
-
  ;; Find Executable Path on OS X
  (when (memq window-system '(mac ns))
    (exec-path-from-shell-initialize))
@@ -242,10 +176,6 @@
 
 ;; 高亮当前行
 (global-hl-line-mode 1)
-
-;;安装主题
-(add-to-list 'my/packages 'monokai-theme)
-(load-theme 'monokai 1)
 
 ;; 关闭工具栏， tool-bar-mode
 (tool-bar-mode -1)
@@ -294,142 +224,46 @@
        auto-mode-alist))
 
 
-(when (not (require 'company-jedi nil :noerror))
-  (message "install company-jedi now...")
-  (setq url-http-attempt-keepalives nil)
-  (package-refresh-contents)
-  (package-install 'company-jedi))
-
-;; python模式使用虚拟环境
-(setq jedi:environment-root "jedi")
-(setq jedi:server-command (jedi:-env-server-command))
-
-(defun config/enable-jedi ()
-  (add-to-list 'company-backends 'company-jedi))
-(add-hook 'python-mode-hook 'jedi:setup)
-(add-hook 'python-mode-hook 'config/enable-jedi)
-
-;; python点补全
-(setq jedi:complete-on-dot t)
-
-;; python 别名补全
-(setq jedi:use-shortcuts t)
-
-;; 最小补全字数
-(setq compandy-minimum-prefix-length 3)
-
-;; 设置补全列表左右对齐
-(setq company-tooltip-align-annotations t)
-
-;; 补全列表 高频词汇优先
-(setq company-transformers '(company-sort-by-occurrence))
-
-;; 补全列表循环
-(setq company-selection-wrap-around t)
-
-;;补全列表中  使用C-n C-p 代替 M-n M-p
-(define-key company-active-map (kbd "M-n") nil)
-(define-key company-active-map (kbd "M-p") nil)
-(define-key company-active-map (kbd "C-n") 'company-select-next)
-(define-key company-active-map (kbd "C-p") 'company-select-previous)
-
-(define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
-(define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
-(define-key company-active-map (kbd "S-TAB") 'company-select-previous)
-(define-key company-active-map (kbd "<backtab>") 'company-select-previous)
-
-
 (when (memq window-system '(mac ns))
   (exec-path-from-shell-initialize))
 
+;; -------------------- python代码补全相关-----------------------
+(when (not package-archive-contents)
+  (package-refresh-contents))
 
-;; 安装 flycheck
-(when (not (require 'flycheck nil :noerror))
-  (message "install flycheck now...")
-  (setq url-http-attempt-keepalives nil)
-  (package-refresh-contents)
-  (package-install 'flycheck))
+(defvar myPackages
+  '(better-defaults
+    ein
+    elpy
+    flycheck
+    material-theme
+    py-autopep8))
 
-;;
-(defun config/enable-flycheck ()
-  (flycheck-mode t))
-(add-hook 'python-mode-hook 'config/enable-flycheck)
+(mapc #'(lambda (package)
+    (unless (package-installed-p package)
+      (package-install package)))
+      myPackages)
 
-(defcustom flycheck-executable-find #'executable-find
-  "Function to search for executables.
+;; BASIC CUSTOMIZATION
+;; --------------------------------------
 
-The value of this option is a function which is given the name or
+(setq inhibit-startup-message t) ;; hide the startup message
+(load-theme 'material t) ;; load material theme
+(global-linum-mode t) ;; enable line numbers globally
 
+;; PYTHON CONFIGURATION
+;; --------------------------------------
 
+(elpy-enable)
+(elpy-use-ipython)
 
-path of an executable and shall return the full path to the
-executable, or nil if the executable does not exit.
+;; use flycheck not flymake with elpy
+(when (require 'flycheck nil t)
+  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+  (add-hook 'elpy-mode-hook 'flycheck-mode))
 
-The default is the standard `executable-find' function which
-searches `exec-path'.  You can customize this option to search
-for checkers in other environments such as bundle or NixOS
-sandboxes."
-  :group 'flycheck
-  :type '(choice (const :tag "Search executables in `exec-path'" executable-find)
-                 (function :tag "Search executables with a custom function"))
-  :package-version '(flycheck . "0.25")
-  :risky t)
+;; enable autopep8 formatting on save
+(require 'py-autopep8)
+(add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
 
-(defun executable-find (command)
-  "Search for COMMAND in `exec-path' and return the absolute file name.
-Return nil if COMMAND is not found anywhere in `exec-path'."
-  ;; Use 1 rather than file-executable-p to better match the behavior of
-  ;; call-process.
-  (locate-file command exec-path exec-suffixes 1))
-
-;; (push "/usr/local/bin/" exec-path)
-
-(when (not (require 'auto-virtualenvwrapper nil :noerror))
-  (message "install auto-virtualenvwrapper now...")
-  (setq url-http-attempt-keepalives nil)
-  (package-refresh-contents)
-  (package-install 'auto-virtualenvwrapper))
-
-(add-hook 'python-mode-hook  #'auto-virtualenvwrapper-activate)
-(add-hook 'window-configuration-change-hook  #'auto-virtualenvwrapper-activate)
-
-
-(declare-function python-shell-calculate-exec-path "python")
-
-(defun flycheck-virtualenv-executable-find (executable)
-  "Find an EXECUTABLE in the current virtualenv if any."
-  (if (bound-and-true-p python-shell-virtualenv-root)
-      (let ((exec-path (python-shell-calculate-exec-path)))
-        (executable-find executable))
-    (executable-find executable)))
-
-(defun flycheck-virtualenv-setup ()
-  "Setup Flycheck for the current virtualenv."
-  (setq-local flycheck-executable-find #'flycheck-virtualenv-executable-find))
-
-
-(when (not (require 'py-autopep8 nil :noerror))
-  (message "install autopep8 now...")
-  (setq url-http-attempt-keepalives nil)
-  (package-refresh-contents)
-  (package-install 'py-autopep8))
-
-(add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
-(setq py-autopep8-options '("--max-line-length=79"))
-
-
-;; 以下是安装包后配置
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-(put 'scroll-left 'disabled nil)
-
-(require 'google-translate)
-(require 'google-translate-default-ui)
-(global-set-key "\C-ct" 'google-translate-at-point)
-(global-set-key "\C-cT" 'google-translate-query-translate)
-
+;; init.el ends here
