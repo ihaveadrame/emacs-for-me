@@ -13,3 +13,16 @@ git status
 git add .
 git commit -m '拆分models'
 git push origin
+python -m iac_crm.utility.img
+workon py2
+python -m iac_crm.utility.img
+pwd
+cd ../__pycache__/ls
+cd ../
+ls
+cd ../
+ls
+python -m iac_crm.utility.img
+git diff
+python -m iac_crm.utility.img
+python -m iac_crm.utility.img

@@ -10,6 +10,10 @@
          '("marmalade" . "http://marmalade-repo.org/packages/"))
 (package-initialize)
 
+(setq inferior-lisp-program "/usr/local/bin/sbcl")
+(setq slime-contribs '(slime-fancy))
+(require 'slime-autoloads)
+
 ;; automatical complete: company
 (require 'company)
 (add-hook 'after-init-hook 'global-company-mode); global enable
@@ -92,7 +96,9 @@
 ;; --------------------------------  下面是python工作常用配置 --------------------------
 ;; elpy-- main actor
 (require 'elpy)
+(package-initialize)
 (elpy-enable)
+(defalias 'workon 'pyvenv-workon)
 ;; enable elpy jedi backend
 (setq elpy-rpc-backend "jedi")
 
@@ -143,6 +149,10 @@
 
 ;; 在python模式中自动启用
 (add-hook 'python-mode-hook 'anaconda-mode)
+
+(setq python-shell-interpreter "python"
+      python-shell-interpreter-args "-i")
+
 
 ;; ------------------------ org-mode设置 ------------------------------------
 (require 'cl)
@@ -231,11 +241,14 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" default)))
  '(epg-gpg-program "/usr/local/bin/gpg2")
  '(google-translate-default-source-language "en")
  '(package-selected-packages
    (quote
-    (htmlize anaconda-mode ggtags elpy company-jedi jedi-core ## neotree window-numbering smex hungry-delete company))))
+    (emmet-mode wgrep-ag rg vue-mode vue-html-mode slime move-line dracula-theme elpygen window-numbering smex smartparens py-autopep8 nodejs-repl neotree monokai-theme material-theme hungry-delete htmlize ggtags flycheck exec-path-from-shell elpy ein counsel company-jedi better-defaults auto-virtualenvwrapper anaconda-mode))))
 (epa-file-enable)
 (setq epa-file-select-keys 0)
 (setq epa-file-cache-passphrase-for-symmetric-encryption t)
@@ -272,10 +285,125 @@
     ("blog-linusp" :components ("org-linusp" "org-static-linusp"))
     ))
 
+(add-hook 'org-mode-hook
+	  (lambda () (setq truncate-lines nil)))
+
 ;; ----------------------- gtag =todo= ---------------------------------------------
 
+(with-eval-after-load 'python
+  (defun python-shell-completion-native-try ()
+    "Return non-nil if can trigger native completion."
+    (let ((python-shell-completion-native-enable t)
+          (python-shell-completion-native-output-timeout
+           python-shell-completion-native-try-output-timeout))
+      (python-shell-completion-native-get-completions
+       (get-buffer-process (current-buffer))
+       nil "_"))))
 
-;; ---------------------- emacs其他调整自动写入配置
+;; ---------------------- emacs js mode
+;(setq vue-mode-packages
+;  '(vue-mode))
+
+;(setq vue-mode-excluded-packages '())
+
+;(defun vue-mode/init-vue-mode (
+;  "Initialize my package"
+;  (use-package vue-mode))
+
+(require 'web-mode)
+(add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+
+;;自动补全html标签
+
+;; ------------------------ org-mode设置 ------------------------------------
+(require 'cl)
+(require 'window-numbering)
+(window-numbering-mode 1)
+(winner-mode 1)
+;; copied from http://puntoblogspot.blogspot.com/2011/05/undo-layouts-in-emacs.html
+(global-set-key (kbd "C-x 4 u") 'winner-undo)
+(global-set-key (kbd "C-x 4 r") 'winner-redo)
+;; org-mode
+(add-hook 'org-mode-hook (lambda () (setq truncate-lines nil)))
+(setq org-export-backends (quote (ascii html icalendar latex md)))
+;; 设置org-model 插入源代码
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (python . t)
+   (C . t)
+   ))
+
+;; 设置org-capture 最小配置
+(require 'org)
+(setq org-export-default-language "zh-CN")
+(global-set-key (kbd "C-c c") 'org-capture)
+(setq org-export-with-sub-superscripts (quote {}))
+(setq org-default-notes-file "~/org/inbox.org")
+(setq org-capture-templates nil)
+
+(add-to-list 'org-capture-templates '("t" "Tasks"))
+(add-to-list 'org-capture-templates
+             '("tr" "Book Reading Task" entry
+               (file+olp "~/Dropbox/org/task.org" "Reading" "Book")
+               "* TODO %^{书名}\n%u\n%a\n" :clock-in t :clock-resume t))
+(add-to-list 'org-capture-templates
+             '("tw" "Work Task" entry
+               (file+headline "~/Dropbox/org/task.org" "Work")
+               "* TODO %^{任务名}\n%u\n%a\n" :clock-in t :clock-resume t))
+
+(add-to-list 'org-capture-templates
+             '("j" "Journal" entry (file+weektree "~/Dropbox/org/journal.org")
+               "* %U - %^{heading}\n  %?"))
+
+(add-to-list 'org-capture-templates
+             '("i" "Inbox" entry (file "~/Dropbox/org/inbox.org")
+               "* %U - %^{heading} %^g\n %?\n"))
+
+(add-to-list 'org-capture-templates
+             '("n" "Notes" entry (file "~/Dropbox/org/notes/inbox.org")
+               "* %^{heading} %t %^g\n  %?\n"))
+
+(add-to-list 'org-capture-templates
+	     '("b" "Billing" plain
+	       (file+function "~/Dropbox/org/billing.org" find-month-tree)
+	       " | %U | %^{类别} | %^{描述} | %^{金额} | " :kill-buffer t))
+
+(defun get-year-and-month ()
+  (list (format-time-string "%Y年") (format-time-string "%m月")))
+
+
+(defun find-month-tree ()
+  (let* ((path (get-year-and-month))
+         (level 1)
+         end)
+    (unless (derived-mode-p 'org-mode)
+      (error "Target buffer \"%s\" should be in Org mode" (current-buffer)))
+    (goto-char (point-min))             ;移动到 buffer 的开始位置
+    ;; 先定位表示年份的 headline，再定位表示月份的 headline
+    (dolist (heading path)
+      (let ((re (format org-complex-heading-regexp-format
+                        (regexp-quote heading)))
+            (cnt 0))
+        (if (re-search-forward re end t)
+            (goto-char (point-at-bol))  ;如果找到了 headline 就移动到对应的位置
+          (progn                        ;否则就新建一个 headline
+            (or (bolp) (insert "\n"))
+            (if (/= (point) (point-min)) (org-end-of-subtree t t))
+            (insert (make-string level ?*) " " heading "\n"))))
+      (setq level (1+ level))
+      (setq end (save-excursion (org-end-of-subtree t t))))
+    (org-end-of-subtree)))
+
+
+(require 'epa-file)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -284,9 +412,94 @@
  '(custom-safe-themes
    (quote
     ("a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" default)))
+ '(epg-gpg-program "/usr/local/bin/gpg2")
+ '(google-translate-default-source-language "en")
  '(package-selected-packages
    (quote
-    (dracula-theme elpygen window-numbering smex smartparens py-autopep8 nodejs-repl neotree monokai-theme material-theme hungry-delete htmlize ggtags flycheck exec-path-from-shell elpy ein counsel company-jedi better-defaults auto-virtualenvwrapper anaconda-mode))))
+    (emmet-mode wgrep-ag rg vue-mode vue-html-mode slime move-line dracula-theme elpygen window-numbering smex smartparens py-autopep8 nodejs-repl neotree monokai-theme material-theme hungry-delete htmlize ggtags flycheck exec-path-from-shell elpy ein counsel company-jedi better-defaults auto-virtualenvwrapper anaconda-mode))))
+(epa-file-enable)
+(setq epa-file-select-keys 0)
+(setq epa-file-cache-passphrase-for-symmetric-encryption t)
+
+
+(add-to-list 'org-capture-templates
+             '("p" "Passwords" entry (file "~/Dropbox/org/passwords.org.gpg")
+               "* %U - %^{title} %^G\n\n  - 用户名: %^{用户名}\n  - 密码: %^{密码}"
+               :empty-lines 1 :kill-buffer t))
+
+
+(require 'ox-publish)
+(setq org-publish-project-alist
+      '(
+    ("org-linusp"
+     ;; Path to your org files.
+     :base-directory "~/Dropbox/org/notes/"
+     :base-extension "org"
+     ;; Path to your Jekyll project.
+     :publishing-directory "~/Dropbox/org/jekyll_blog/ihaveadrame.github.io/_posts/"
+     :recursive t
+     :publishing-function org-html-publish-to-html
+     :headline-levels 4
+     :html-extension "html"
+     :body-only t ;; Only export section between <body> </body>
+     )
+    ("org-static-linusp"
+     :base-directory "~/blog/org/"
+     :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|php"
+     :publishing-directory "~/blog/Jekyll/"
+     :recursive t
+     :publishing-function org-publish-attachment
+     )
+    ("blog-linusp" :components ("org-linusp" "org-static-linusp"))
+    ))
+
+(add-hook 'org-mode-hook
+	  (lambda () (setq truncate-lines nil)))
+
+;; ----------------------- gtag =todo= ---------------------------------------------
+
+(with-eval-after-load 'python
+  (defun python-shell-completion-native-try ()
+    "Return non-nil if can trigger native completion."
+    (let ((python-shell-completion-native-enable t)
+          (python-shell-completion-native-output-timeout
+           python-shell-completion-native-try-output-timeout))
+      (python-shell-completion-native-get-completions
+       (get-buffer-process (current-buffer))
+       nil "_"))))
+
+;; ---------------------- emacs js mode
+;(setq vue-mode-packages
+;  '(vue-mode))
+
+;(setq vue-mode-excluded-packages '())
+
+;(defun vue-mode/init-vue-mode (
+;  "Initialize my package"
+;  (use-package vue-mode))
+
+(require 'web-mode)
+(add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+
+;;自动补全html标签
+(require 'emmet-mode)
+(add-hook 'sgml-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
+(add-hook 'html-mode-hook 'emmet-mode)
+(add-hook 'web-mode-hook 'emmet-mode)
+(add-hook 'css-mode-hook  'emmet-mode)
+;; ---------------------- 全局查找
+(require 'rg)
+(rg-enable-default-bindings (kbd "M-s"))
+(add-hook 'rg-mode-hook 'wgrep-ag-setup)
+;; ---------------------- emacs其他调整自动写入配置
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
