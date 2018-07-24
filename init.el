@@ -488,6 +488,9 @@
 (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
 
+;; 设置快捷键 调用外部浏览器打开页面
+(define-key web-mode-map (kbd "C-c C-v") 'browse-url-of-file)
+
 ;;自动补全html标签
 (require 'emmet-mode)
 (add-hook 'sgml-mode-hook 'emmet-mode) ;; Auto-start on any markup modes
