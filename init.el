@@ -94,38 +94,6 @@
 
 
 ;; --------------------------------  下面是python工作常用配置 --------------------------
-;; elpy-- main actor
-(require 'elpy)
-(package-initialize)
-(elpy-enable)
-(defalias 'workon 'pyvenv-workon)
-;; enable elpy jedi backend
-(setq elpy-rpc-backend "jedi")
-
-;; Fixing a key binding bug in elpy
-(define-key yas-minor-mode-map (kbd "C-c k") 'yas-expand)
-;; Fixing another key binding bug in iedit mode
-(define-key global-map (kbd "C-c o") 'iedit-mode)
-
-;; grammal check: flycheck
-(add-hook 'after-init-hook #'global-flycheck-mode);global enable
-                    ; close flymake,  start flycheck
-(when (require 'flycheck nil t)
-  (setq elpy-modules(delq 'elpy-module-flymake elpy-modules))
-  (add-hook 'elpy-mode-hook 'flycheck-mode))
-
-;; virutal environment:  virtualenvwrapper
-(require 'virtualenvwrapper)
-(venv-initialize-interactive-shells)
-(venv-initialize-eshell)
-(setq venv-location "~/.virtualenvs/"); setup virtual environment folder
-;; if there multiple folder:
-;; (setq venv-location '("~/myvenv-1/"
-;;                       "~/myvenv-2/"))
-;; M-x venv-workon open virtual environment
-;; if `venv-workon` not work, try to run  M-x pyvenv-activate -> choic your venv
-;;; Commentary:
-
 ;; 自动补全
 (require 'company)
 (global-company-mode t); 全局开启
@@ -146,12 +114,53 @@
                     ; 补全菜单选项快捷键
 (define-key company-active-map (kbd "C-n") 'company-select-next)
 (define-key company-active-map (kbd "C-p") 'company-select-previous)
-
+;(setenv "PATHONPATH" "/usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages")
 ;; 在python模式中自动启用
 (add-hook 'python-mode-hook 'anaconda-mode)
 
-(setq python-shell-interpreter "python"
-      python-shell-interpreter-args "-i")
+;(setq python-shell-interpreter "python"
+;      python-shell-interpreter-args "-i")
+
+;(defun my/python-mode-hook ()
+ ; (add-to-list 'company-backends 'company-jedi))
+
+;(add-hook 'python-mode-hook 'my/python-mode-hook)
+
+;; elpy-- main actor
+(require 'elpy)
+(package-initialize)
+(defalias 'workon 'pyvenv-workon)
+;; enable elpy jedi backend
+;(setq elpy-rpc-backend "jedi")
+(setq elpy-rpc-python-command "python")
+(setq python-shell-interpreter "python")
+(setq pyvenv-virtualenvwrapper-python "/usr/bin/python")
+(elpy-enable)
+;; Fixing a key binding bug in elpy
+(define-key yas-minor-mode-map (kbd "C-c k") 'yas-expand)
+;; Fixing another key binding bug in iedit mode
+(define-key global-map (kbd "C-c o") 'iedit-mode)
+(add-hook 'python-mode-hook 'anaconda-eldoc-mode)
+;; grammal check: flycheck
+;;(add-hook 'after-init-hook #'global-flycheck-mode);global enable
+                    ; close flymake,  start flycheck
+(when (require 'flycheck nil t)
+  (setq elpy-modules(delq 'elpy-module-flymake elpy-modules))
+  (add-hook 'elpy-mode-hook 'flycheck-mode))
+
+;; virutal environment:  virtualenvwrapper
+(require 'virtualenvwrapper)
+(venv-initialize-interactive-shells)
+(venv-initialize-eshell)
+(setq venv-location "~/.virtualenvs/"); setup virtual environment folder
+;; if there multiple folder:
+;; (setq venv-location '("~/myvenv-1/"
+;;                       "~/myvenv-2/"))
+;; M-x venv-workon open virtual environment
+;; if `venv-workon` not work, try to run  M-x pyvenv-activate -> choic your venv
+;;; Commentary:
+
+
 
 
 ;; ------------------------ org-mode设置 ------------------------------------
@@ -246,9 +255,10 @@
     ("a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" default)))
  '(epg-gpg-program "/usr/local/bin/gpg2")
  '(google-translate-default-source-language "en")
+ '(js-indent-level 2)
  '(package-selected-packages
    (quote
-    (emmet-mode wgrep-ag rg vue-mode vue-html-mode slime move-line dracula-theme elpygen window-numbering smex smartparens py-autopep8 nodejs-repl neotree monokai-theme material-theme hungry-delete htmlize ggtags flycheck exec-path-from-shell elpy ein counsel company-jedi better-defaults auto-virtualenvwrapper anaconda-mode))))
+    (company-anaconda emmet-mode wgrep-ag rg vue-mode vue-html-mode slime move-line dracula-theme elpygen window-numbering smex smartparens py-autopep8 nodejs-repl neotree monokai-theme material-theme hungry-delete htmlize ggtags flycheck exec-path-from-shell elpy ein counsel company-jedi better-defaults auto-virtualenvwrapper anaconda-mode))))
 (epa-file-enable)
 (setq epa-file-select-keys 0)
 (setq epa-file-cache-passphrase-for-symmetric-encryption t)
@@ -353,23 +363,23 @@
 (add-to-list 'org-capture-templates
              '("tr" "Book Reading Task" entry
                (file+olp "~/Dropbox/org/task.org" "Reading" "Book")
-               "* TODO %^{书名}\n%u\n%a\n" :clock-in t :clock-resume t))
+               "** TODO %^{书名}\n%u\n%a\n" :clock-in t :clock-resume t))
 (add-to-list 'org-capture-templates
              '("tw" "Work Task" entry
                (file+headline "~/Dropbox/org/task.org" "Work")
-               "* TODO %^{任务名}\n%u\n%a\n" :clock-in t :clock-resume t))
+               "** TODO %^{任务名}\n%u\n%a\n" :clock-in t :clock-resume t))
 
 (add-to-list 'org-capture-templates
              '("j" "Journal" entry (file+weektree "~/Dropbox/org/journal.org")
-               "* %U - %^{heading}\n  %?"))
+               "** %U - %^{heading}\n  %?"))
 
 (add-to-list 'org-capture-templates
              '("i" "Inbox" entry (file "~/Dropbox/org/inbox.org")
-               "* %U - %^{heading} %^g\n %?\n"))
+               "** %U - %^{heading} %^g\n %?\n"))
 
 (add-to-list 'org-capture-templates
              '("n" "Notes" entry (file "~/Dropbox/org/notes/inbox.org")
-               "* %^{heading} %t %^g\n  %?\n"))
+               "** %^{heading} %t %^g\n  %?\n"))
 
 (add-to-list 'org-capture-templates
 	     '("b" "Billing" plain
@@ -404,19 +414,7 @@
 
 
 (require 'epa-file)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" default)))
- '(epg-gpg-program "/usr/local/bin/gpg2")
- '(google-translate-default-source-language "en")
- '(package-selected-packages
-   (quote
-    (emmet-mode wgrep-ag rg vue-mode vue-html-mode slime move-line dracula-theme elpygen window-numbering smex smartparens py-autopep8 nodejs-repl neotree monokai-theme material-theme hungry-delete htmlize ggtags flycheck exec-path-from-shell elpy ein counsel company-jedi better-defaults auto-virtualenvwrapper anaconda-mode))))
+
 (epa-file-enable)
 (setq epa-file-select-keys 0)
 (setq epa-file-cache-passphrase-for-symmetric-encryption t)
@@ -487,6 +485,19 @@
 (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+
+;; 设置web缩进
+(defun my-web-mode-hook ()
+  "Hooks for Web mode."
+  ;; indent setting
+  (setq web-mode-markup-indent-offset 2)
+  ;; comment style setting
+  (setq web-mode-comment-style 2))
+(add-hook 'web-mode-hook  'my-web-mode-hook)
+
+;; 设置js2-mode 缩进2
+;; 不能动态的设置，只能通过 M-x customize-variable -> 输入js2-basic-offset -> 设置缩进为2保存退出
+
 
 ;; 设置快捷键 调用外部浏览器打开页面
 (define-key web-mode-map (kbd "C-c C-v") 'browse-url-of-file)
