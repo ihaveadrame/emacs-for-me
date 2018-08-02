@@ -26,3 +26,4 @@ python -m iac_crm.utility.img
 git diff
 python -m iac_crm.utility.img
 python -m iac_crm.utility.img
+python
