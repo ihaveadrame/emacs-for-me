@@ -19,10 +19,21 @@
 (add-hook 'after-init-hook 'global-company-mode); global enable
 (setq company-show-numbers t); display serial number
 (setq company-idle-delay 0.2); menu delay
-(setq company-minimum-prefix-length 1); start completelyness number
+(setq company-minimum-prefix-length 2); start completelyness number
 
 
+(provide 'cancel-minibuffer)
 
+(defun cancel-minibuffer-first (sub-read &rest args)
+    (let ((active (active-minibuffer-window)))
+        (if active
+                (progn
+                    ;; we have to trampoline, since we're IN the minibuffer right now.
+                    (apply 'run-at-time 0 nil sub-read args)
+                    (abort-recursive-edit))
+            (apply sub-read args))))
+
+(advice-add 'read-from-minibuffer :around #'cancel-minibuffer-first)
 
 ;; -----------------------------------  下面是基础设置 -------------------
 ;;主题
@@ -57,7 +68,7 @@
 (setq inhibit-splash-screen 1)
 
 ;; 更改字体大小 16pt
-(set-face-attribute 'default nil :height 160)
+(set-face-attribute 'default nil :height 150)
 
 ;; 关闭自动备份文件功能
 (setq make-backup-files nil)
@@ -258,7 +269,7 @@
  '(js-indent-level 2)
  '(package-selected-packages
    (quote
-    (company-anaconda emmet-mode wgrep-ag rg vue-mode vue-html-mode slime move-line dracula-theme elpygen window-numbering smex smartparens py-autopep8 nodejs-repl neotree monokai-theme material-theme hungry-delete htmlize ggtags flycheck exec-path-from-shell elpy ein counsel company-jedi better-defaults auto-virtualenvwrapper anaconda-mode))))
+    (json-mode pandoc markdown-mode company-anaconda emmet-mode wgrep-ag rg vue-mode vue-html-mode slime move-line dracula-theme elpygen window-numbering smex smartparens py-autopep8 nodejs-repl neotree monokai-theme material-theme hungry-delete htmlize ggtags flycheck exec-path-from-shell elpy ein counsel company-jedi better-defaults auto-virtualenvwrapper anaconda-mode))))
 (epa-file-enable)
 (setq epa-file-select-keys 0)
 (setq epa-file-cache-passphrase-for-symmetric-encryption t)
@@ -512,8 +523,47 @@
 (require 'rg)
 (rg-enable-default-bindings (kbd "M-s"))
 (add-hook 'rg-mode-hook 'wgrep-ag-setup)
-;; ---------------------- emacs其他调整自动写入配置
+;; ---------------------- markdown 配置
 
+;; move line up down
+(defun move-text-internal (arg)
+  (cond
+   ((and mark-active transient-mark-mode)
+    (if (> (point) (mark))
+        (exchange-point-and-mark))
+    (let ((column (current-column))
+          (text (delete-and-extract-region (point) (mark))))
+      (forward-line arg)
+      (move-to-column column t)
+      (set-mark (point))
+      (insert text)
+      (exchange-point-and-mark)
+      (setq deactivate-mark nil)))
+   (t
+    (let ((column (current-column)))
+      (beginning-of-line)
+      (when (or (> arg 0) (not (bobp)))
+        (forward-line)
+        (when (or (< arg 0) (not (eobp)))
+          (transpose-lines arg))
+        (forward-line -1))
+      (move-to-column column t)))))
+
+(defun move-text-down (arg)
+  "Move region (transient-mark-mode active) or current line
+  arg lines down."
+  (interactive "*p")
+  (move-text-internal arg))
+
+(defun move-text-up (arg)
+  "Move region (transient-mark-mode active) or current line
+  arg lines up."
+  (interactive "*p")
+  (move-text-internal (- arg)))
+
+(global-set-key (kbd "M-p") 'move-text-up)
+(global-set-key (kbd "M-n") 'move-text-down)
+;; ---------------------- emacs其他调整自动写入配置
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

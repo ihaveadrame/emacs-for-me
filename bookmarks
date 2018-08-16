@@ -4,7 +4,7 @@
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
 (("org-capture-last-stored"
  (filename . "~/Dropbox/org/notes/inbox.org")
- (front-context-string . "* 我的前端快捷键 <2018-")
- (rear-context-string . "))'\n  #+END_SRC\n")
- (position . 5949))
+ (front-context-string . "* linux jq：将json")
+ (rear-context-string . "uffer [2 times]\n")
+ (position . 9463))
 )
